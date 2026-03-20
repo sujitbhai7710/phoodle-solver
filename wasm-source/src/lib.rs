@@ -410,6 +410,6 @@ struct JsGuess {
 // Initialize the WASM module
 #[wasm_bindgen(start)]
 pub fn init() {
-    #[cfg(feature = "console_error_panic_hook")]
+    // Always enable panic hook for better error messages
     console_error_panic_hook::set_once();
 }

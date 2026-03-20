@@ -26,14 +26,15 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 export interface InitOutput {
     readonly memory: WebAssembly.Memory;
     readonly __wbg_phoodlesolver_free: (a: number, b: number) => void;
-    readonly init: () => void;
     readonly phoodlesolver_get_starters: (a: number, b: number) => number;
     readonly phoodlesolver_new: () => number;
     readonly phoodlesolver_solve: (a: number, b: number) => number;
     readonly phoodlesolver_word_count: (a: number) => number;
+    readonly init: () => void;
     readonly __wbindgen_export: (a: number, b: number) => number;
     readonly __wbindgen_export2: (a: number, b: number, c: number, d: number) => number;
     readonly __wbindgen_export3: (a: number) => void;
+    readonly __wbindgen_export4: (a: number, b: number, c: number) => void;
     readonly __wbindgen_start: () => void;
 }
 
