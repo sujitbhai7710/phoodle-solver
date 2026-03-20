@@ -1,44 +1,73 @@
-# Phoodle Solver - Standalone WASM
+# Phoodle Solver - WASM Source (Rust)
 
-Single HTML file with embedded WASM - no build step required!
-
-## Usage
-
-Simply serve these files with any HTTP server:
-
-```bash
-# Python
-python3 -m http.server 3000
-
-# Node.js
-npx serve .
-
-# Then open http://localhost:3000
-```
-
-## Files
-
-- `index.html` - Complete solver UI
-- `phoodle_solver.js` - WASM JavaScript bindings
-- `phoodle_solver_bg.js` - WASM bootstrap
-- `phoodle_solver_bg.wasm` - Compiled WASM binary (~200KB)
+High-performance entropy-based solver compiled to WebAssembly.
 
 ## Features
 
-- WASM-powered solver (fast!)
-- 13,064 food words embedded
-- Entropy algorithm + Ngram frequency
-- Mobile responsive
-- No external dependencies
+- ~10x faster than JavaScript implementation
+- 13,064 words embedded in binary
+- Ngram frequency scores included
+- Zero runtime dependencies
 
-## How It Works
+## Build Requirements
 
-1. Loads WASM binary on page load
-2. User enters guess from Phoodle
-3. Click letters to cycle: ⬛ → 🟨 → 🟩
-4. WASM calculates best next guesses
-5. Shows remaining possible words
+- Rust (1.70+)
+- wasm-pack
 
-## Self-Hosting
+```bash
+# Install Rust
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
-Just copy all files to your web server. No npm, no build, no backend needed!
+# Install wasm-pack
+cargo install wasm-pack
+```
+
+## Build
+
+```bash
+wasm-pack build --target web --out-dir OUTPUT_DIR --release
+```
+
+## API
+
+```javascript
+import init, { PhoodleSolver } from './phoodle_solver.js';
+
+await init();
+const solver = new PhoodleSolver();
+
+// Get starter words
+const starters = solver.get_starters(10);
+
+// Solve with guesses
+const result = solver.solve([
+  { word: 'salet', result: 'BGBYB' },  // B=black, Y=yellow, G=green
+  { word: 'crane', result: 'BBGYG' }
+]);
+
+console.log(result.best_guesses);
+console.log(result.remaining_count);
+```
+
+## Result Format
+
+```typescript
+{
+  remaining_count: number,
+  possible_answers: string[],
+  best_guesses: {
+    word: string,
+    entropy: number,
+    expected_remaining: number,
+    is_possible_answer: boolean,
+    freq_score: number
+  }[],
+  solve_time_ms: number
+}
+```
+
+## Algorithm
+
+1. Bit-packed pattern calculation (0-242 possible patterns)
+2. Shannon entropy: `-Σ p * log2(p)`
+3. Frequency tiebreaker when entropy within 0.1 bits

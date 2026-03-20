@@ -190,6 +190,12 @@ fn combined_sort_key(entropy: f64, freq_score: u8, is_possible: bool, remaining:
     (entropy_weight, freq_score, is_possible)
 }
 
+/// Browser-safe timestamp for measuring solve duration in WASM.
+#[inline]
+fn now_ms() -> f64 {
+    js_sys::Date::now()
+}
+
 // ============================================
 // JavaScript Interface Types
 // ============================================
@@ -266,7 +272,7 @@ impl PhoodleSolver {
     /// Solve and get best guesses
     #[wasm_bindgen]
     pub fn solve(&self, guesses: JsValue) -> JsValue {
-        let start = std::time::Instant::now();
+        let start_ms = now_ms();
         
         // Parse guesses from JS
         let guesses_js: Vec<JsGuess> = match serde_wasm_bindgen::from_value(guesses) {
@@ -384,7 +390,7 @@ impl PhoodleSolver {
             answer_scores.into_iter().take(10).collect()
         };
         
-        let elapsed = start.elapsed().as_secs_f64() * 1000.0;
+        let elapsed = now_ms() - start_ms;
         
         serde_wasm_bindgen::to_value(&SolveResult {
             remaining_count,
